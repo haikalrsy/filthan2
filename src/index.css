@@ -1,0 +1,48 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Space Grotesk", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  
+  --color-primary: #6366f1; /* Modern Indigo */
+  --color-accent: #f43f5e; /* Rose */
+  --color-dark: #0f172a; /* Slate 900 */
+  --color-surface: rgba(15, 23, 42, 0.9);
+  --color-border: rgba(51, 65, 85, 0.5);
+}
+
+@layer base {
+  body {
+    @apply bg-[#030712] text-white font-sans antialiased selection:bg-primary/20 selection:text-primary;
+  }
+}
+
+@layer components {
+  .primary-gradient {
+    @apply bg-gradient-to-br from-indigo-500 via-primary to-violet-600;
+  }
+  
+  .glass-card {
+    @apply bg-slate-900/40 backdrop-blur-xl border border-slate-800 shadow-[0_8px_40px_rgba(0,0,0,0.2)] rounded-[2.5rem];
+  }
+
+  .neo-glow-primary {
+    @apply shadow-[0_0_20px_rgba(99,102,241,0.3)];
+  }
+  
+  .neo-glow-accent {
+    @apply shadow-[0_0_20px_rgba(244,63,94,0.3)];
+  }
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 rounded-full hover:bg-slate-700 transition-colors;
+}

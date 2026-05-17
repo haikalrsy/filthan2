@@ -1,0 +1,5 @@
+{
+  "name": "Keputusan Kenaikan Kelas & Kelulusan",
+  "description": "Sistem informasi pengambilan keputusan kenaikan kelas dan kelulusan siswa berdasarkan data absensi dan kriteria akademik.",
+  "requestFramePermissions": []
+}
