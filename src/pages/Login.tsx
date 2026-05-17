@@ -20,44 +20,18 @@ export default function Login() {
         provider: 'google',
         options: {
           redirectTo: window.location.origin + '/app',
-          skipBrowserRedirect: true
+          skipBrowserRedirect: false // Better for mobile to just redirect
         }
       });
       
       if (error) throw error;
       
       if (data?.url) {
-        // Open the OAuth URL in a popup to avoid iframe restrictions
-        const width = 600;
-        const height = 700;
-        const left = window.screenX + (window.outerWidth - width) / 2;
-        const top = window.screenY + (window.outerHeight - height) / 2;
-        
-        const popup = window.open(
-          data.url,
-          'google-login',
-          `width=${width},height=${height},left=${left},top=${top}`
-        );
-
-        if (!popup) {
-          throw new Error('Popup diblokir! Silakan izinkan popup untuk login Google.');
-        }
-
-        // Poll to check if popup is closed and session is established
-        const timer = setInterval(async () => {
-          if (popup.closed) {
-            clearInterval(timer);
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-              navigate('/app');
-            } else {
-              setLoading(false);
-            }
-          }
-        }, 1000);
+        window.location.href = data.url;
       }
     } catch (err: any) {
-      setError(err.message);
+      console.error('Google Login Error:', err);
+      setError(`Auth Error: ${err.message || 'Check connection'}`);
       setLoading(false);
     }
   };
@@ -72,7 +46,13 @@ export default function Login() {
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        // Handle the frequent 400 error on mobile with a clearer message
+        if (error.status === 400) {
+           throw new Error('Login Gagal (400): Pastikan waktu di HP Anda akurat (Sync Time) dan cookie tidak diblokir.');
+        }
+        throw error;
+      }
 
       if (data.user) {
         // Check if profile exists

@@ -6,10 +6,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { motion } from 'motion/react';
-import { supabase } from './lib/supabase';
+import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { isAdmin } from './config';
-import { Shield, BookOpen, GraduationCap } from 'lucide-react';
+import { Shield, BookOpen, GraduationCap, AlertTriangle, ExternalLink } from 'lucide-react';
 
 // Pages
 import Landing from './pages/Landing';
@@ -39,6 +39,55 @@ export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  if (!isSupabaseConfigured) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#030712] p-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
+          <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-lg w-full bg-[#0a0a0b]/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-[#1e1e24] p-12 text-center space-y-8 relative z-10"
+        >
+          <div className="w-20 h-20 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto border border-amber-500/20 shadow-2xl">
+            <AlertTriangle size={40} className="text-amber-500" />
+          </div>
+          
+          <div className="space-y-4">
+            <h1 className="text-sm font-black text-white/60 tracking-[0.4em] uppercase font-mono italic">Configuration Required</h1>
+            <h2 className="text-3xl font-extrabold text-white tracking-widest uppercase italic font-display">Grid Link Offline</h2>
+            <p className="text-xs font-black text-gray-500 leading-relaxed uppercase tracking-[0.2em] font-mono italic">
+              Terminal ini memerlukan sinkronisasi dengan Supabase Cloud. Silakan atur variabel lingkungan di menu Pengaturan.
+            </p>
+          </div>
+
+          <div className="bg-[#111115] p-6 rounded-xl border border-[#1e1e24] text-left space-y-4">
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.4em] font-mono italic">Setup Protocol:</p>
+            <ol className="text-[10px] font-black text-gray-400 space-y-3 font-mono uppercase tracking-widest">
+              <li className="flex gap-3"><span className="text-primary">01.</span> Register at supabase.com</li>
+              <li className="flex gap-3"><span className="text-primary">02.</span> Open App Settings &gt; Secrets</li>
+              <li className="flex gap-3"><span className="text-primary">03.</span> Define VITE_SUPABASE_URL</li>
+              <li className="flex gap-3"><span className="text-primary">04.</span> Define VITE_SUPABASE_ANON_KEY</li>
+            </ol>
+          </div>
+
+          <a 
+            href="https://supabase.com" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="w-full py-5 primary-gradient text-white font-black rounded-xl shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 tracking-widest uppercase font-mono italic"
+          >
+            Access Supabase Cloud
+            <ExternalLink size={18} />
+          </a>
+        </motion.div>
+      </div>
+    );
+  }
 
   useEffect(() => {
     // Check active sessions and subscribe to auth changes
