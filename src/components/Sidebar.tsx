@@ -47,11 +47,11 @@ export default function Sidebar({ profile }: SidebarProps) {
       <div className="p-8 flex-1 overflow-y-auto custom-scrollbar">
         <div className="flex items-center gap-3 mb-12">
           <div className="w-12 h-12 primary-gradient rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary/20 transition-transform hover:scale-105">
-            E
+            N
           </div>
           <div>
-            <h1 className="text-xl font-extrabold text-white tracking-tight leading-none">EduCore</h1>
-            <p className="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mt-1">Sistem Terpadu</p>
+            <h1 className="text-xl font-extrabold text-white tracking-widest leading-none uppercase font-mono italic">NeoVision</h1>
+            <p className="text-[10px] font-black text-primary uppercase tracking-[0.2em] mt-1 font-mono">Decision Protocol</p>
           </div>
         </div>
 

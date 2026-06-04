@@ -22,8 +22,8 @@ export default function Navbar({ profile }: NavbarProps) {
           <Menu size={20} />
         </button>
         <div className="flex items-center gap-2">
-           <div className="w-8 h-8 primary-gradient rounded-lg flex items-center justify-center text-white font-bold text-sm">E</div>
-           <h1 className="text-sm font-extrabold text-white tracking-tight">EduCore</h1>
+           <div className="w-8 h-8 primary-gradient rounded-lg flex items-center justify-center text-white font-bold text-sm font-mono italic">N</div>
+           <h1 className="text-sm font-extrabold text-white tracking-widest font-mono italic">NEOVISION</h1>
         </div>
       </div>
 

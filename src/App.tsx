@@ -9,7 +9,7 @@ import { motion } from 'motion/react';
 import { supabase, isSupabaseConfigured } from './lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { isAdmin } from './config';
-import { Shield, BookOpen, GraduationCap, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Shield, BookOpen, GraduationCap, AlertTriangle, ExternalLink, Lock, RefreshCw } from 'lucide-react';
 
 // Pages
 import Landing from './pages/Landing';
@@ -92,25 +92,35 @@ export default function App() {
   useEffect(() => {
     // Check active sessions and subscribe to auth changes
     const getSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        setUser(session.user);
-        await fetchProfile(session.user);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session) {
+          setUser(session.user);
+          await fetchProfile(session.user);
+        }
+      } catch (err) {
+        console.error('Error in getSession check:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (session) {
-        setUser(session.user);
-        await fetchProfile(session.user);
-      } else {
-        setUser(null);
-        setProfile(null);
+      try {
+        if (session) {
+          setUser(session.user);
+          await fetchProfile(session.user);
+        } else {
+          setUser(null);
+          setProfile(null);
+        }
+      } catch (err) {
+        console.error('Error in auth state change:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();
@@ -205,33 +215,38 @@ export default function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[#FFFDFB] relative overflow-hidden paw-pattern">
-        {/* Background Decorative Elements */}
-        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[100px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[30%] h-[30%] bg-secondary/10 rounded-full blur-[80px]" />
+      <div className="min-h-screen flex items-center justify-center bg-[#030712] p-6 relative overflow-hidden">
+        {/* Background Grid & Ambient Glows */}
+        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+          <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
+          <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+          <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
+        </div>
         
-        <div className="relative z-10 text-center space-y-8">
+        <div className="relative z-10 text-center space-y-8 max-w-sm w-full">
           <motion.div 
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
-            className="w-24 h-24 bg-white rounded-[2.5rem] shadow-xl shadow-primary/10 border-2 border-white flex items-center justify-center mx-auto relative group active:scale-95 transition-transform"
+            className="w-20 h-20 bg-[#0a0a0b]/80 rounded-2xl flex items-center justify-center mx-auto border border-[#1e1e24] shadow-2xl relative group"
           >
-            <div className="text-5xl animate-bounce">🐱</div>
+            <RefreshCw size={36} className="text-primary animate-spin" />
           </motion.div>
           
           <div className="space-y-4">
-            <h1 className="text-4xl font-extrabold text-dark tracking-tight leading-none italic">
-              MEOW<span className="text-primary tracking-tighter">CORE</span>
+            <h1 className="text-3xl font-extrabold text-white tracking-widest uppercase italic font-display">
+              NEO<span className="text-primary tracking-tighter">VISION</span>
             </h1>
-            <p className="text-[11px] font-bold text-primary/60 uppercase tracking-[0.4em] animate-pulse">Menghubungkan Terminal Meow...</p>
+            <p className="text-[10px] font-black text-primary/80 uppercase tracking-[0.4em] animate-pulse font-mono block">
+              INITIALIZING PROTOCOL MATRIX...
+            </p>
           </div>
 
-          <div className="w-48 h-2 bg-slate-100 rounded-full mx-auto overflow-hidden shadow-inner">
+          <div className="w-48 h-1 bg-[#111115] rounded-full mx-auto overflow-hidden border border-[#1e1e24]">
             <motion.div 
               initial={{ x: "-100%" }}
               animate={{ x: "100%" }}
               transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut" }}
-              className="w-1/2 h-full primary-gradient rounded-full"
+              className="w-1/2 h-full bg-primary rounded-full"
             />
           </div>
         </div>
@@ -256,6 +271,7 @@ export default function App() {
               <Navigate to="/login" />
             )
           } 
+          
         />
 
         <Route path="/app" element={
@@ -263,26 +279,29 @@ export default function App() {
             !profile?.role ? (
               <Navigate to="/complete-profile" />
             ) : !profile.is_approved ? (
-              <div className="min-h-screen bg-surface-lighter flex items-center justify-center p-6 relative overflow-hidden font-sans paw-pattern">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px]" />
-                <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary/10 rounded-full blur-[80px]" />
+              <div className="min-h-screen bg-[#030712] flex items-center justify-center p-6 relative overflow-hidden">
+                <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                  <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
+                  <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-indigo-500/10 rounded-full blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }}></div>
+                  <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
+                </div>
                 
-                <div className="max-w-md w-full bg-white/80 backdrop-blur-xl p-12 rounded-[4rem] border-4 border-white shadow-[0_20px_60px_rgba(255,154,162,0.05)] text-center space-y-8 relative z-10 transition-all duration-700">
-                  <div className="w-24 h-24 bg-amber-50 rounded-[2.5rem] flex items-center justify-center mx-auto border-2 border-amber-100 shadow-sm text-5xl">
-                    😿
+                <div className="max-w-md w-full bg-[#0a0a0b]/80 backdrop-blur-2xl p-12 rounded-3xl border border-[#1e1e24] shadow-2xl text-center space-y-8 relative z-10">
+                  <div className="w-20 h-20 bg-amber-500/10 rounded-2xl flex items-center justify-center mx-auto border border-amber-500/20 shadow-2xl">
+                    <Lock size={32} className="text-amber-500 animate-pulse" />
                   </div>
                   <div className="space-y-4">
-                    <h1 className="text-3xl font-extrabold text-dark tracking-tight">Menunggu Meow-Approval</h1>
-                    <p className="text-slate-500 text-sm font-medium leading-relaxed">
-                      Profilmu sedang diperiksa oleh Admin Kucing. 
-                      Sabar ya, meow! Petualanganmu akan segera dimulai setelah diverifikasi.
+                    <h1 className="text-xs font-black text-white/60 tracking-[0.4em] uppercase font-mono italic">Security Status</h1>
+                    <h2 className="text-2xl font-extrabold text-white uppercase italic tracking-wider">Otorisasi Tertunda</h2>
+                    <p className="text-[11px] font-black leading-relaxed text-gray-500 uppercase tracking-widest font-mono italic">
+                      Profil Anda sedang diverifikasi oleh administrator sistem NeoVision. Harap tunggu hingga sesi Anda diaktifkan secara resmi.
                     </p>
                   </div>
                   <button 
                     onClick={() => supabase.auth.signOut()}
-                    className="w-full py-5 bg-slate-50 text-slate-400 font-extrabold rounded-3xl hover:bg-rose-50 hover:text-rose-500 transition-all uppercase tracking-widest text-[10px] border border-slate-100 active:scale-95"
+                    className="w-full py-5 bg-[#111115] text-red-500 hover:bg-red-950/20 font-black rounded-xl hover:text-red-400 transition-all uppercase tracking-widest text-[10px] border border-red-500/20 active:scale-95 font-mono"
                   >
-                    Batal Meow (Keluar)
+                    Abort Session (Keluar)
                   </button>
                 </div>
               </div>

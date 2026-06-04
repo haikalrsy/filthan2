@@ -65,64 +65,81 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
   };
 
   return (
-    <div className="min-h-screen bg-surface-lighter flex items-center justify-center p-6 paw-pattern">
+    <div className="min-h-screen bg-[#030712] flex items-center justify-center p-6 relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-[#121214]/10 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
+      </div>
+
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-white rounded-[3.5rem] shadow-xl overflow-hidden border border-slate-100"
+        className="max-w-md w-full bg-[#0a0a0b]/80 backdrop-blur-2xl rounded-3xl border border-[#1e1e24] shadow-2xl overflow-hidden relative z-10"
       >
-        <div className="primary-gradient p-10 text-white text-center">
-          <div className="w-20 h-20 bg-white/20 rounded-[1.5rem] flex items-center justify-center mx-auto mb-4 backdrop-blur-md text-4xl">
-            🐾
+        <div className="p-10 border-b border-[#1e1e24] text-center space-y-4">
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto border border-primary/20 shadow-2xl">
+            <UserIcon size={32} className="text-primary animate-pulse" />
           </div>
-          <h1 className="text-2xl font-extrabold tracking-tight">Kenalan Meow?</h1>
-          <p className="opacity-80 text-sm mt-2 font-medium">Lengkapi profil kucingmu untuk mulai!</p>
+          <div>
+            <h1 className="text-2xl font-extrabold text-white tracking-widest uppercase italic font-mono">Lengkapi Profil</h1>
+            <p className="text-[10px] text-gray-500 font-extrabold tracking-widest uppercase mt-1 font-mono">Daftarkan Kredensial Akademik Anda</p>
+          </div>
         </div>
 
         <form onSubmit={handleSubmit} className="p-10 space-y-8">
           <div className="space-y-2">
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Nama Lengkap</label>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 font-mono">Nama Lengkap</label>
             <div className="relative">
-              <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+              <UserIcon className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold placeholder:text-slate-300 transition-all"
-                placeholder="Masukkan nama lengkap Anda"
+                className="w-full pl-14 pr-6 py-4 bg-[#111115] border border-[#1e1e24] rounded-xl text-white outline-none font-bold placeholder:text-gray-600 focus:border-primary transition-all font-mono"
+                placeholder="NAMA LENGKAP"
                 required
               />
             </div>
           </div>
 
           <div className="space-y-4">
-            <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Pilih Peran Meow</label>
+            <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 font-mono">Pilih Otoritas Peran</label>
             <div className="grid grid-cols-2 gap-4">
               <button
                 type="button"
                 onClick={() => setRole('siswa')}
-                className={`p-6 rounded-[2rem] border-2 transition-all text-center space-y-3 ${
+                className={`p-6 rounded-2xl border transition-all text-center space-y-4 ${
                   role === 'siswa' 
-                    ? 'border-primary bg-primary/5 text-primary shadow-lg shadow-primary/10' 
-                    : 'border-slate-50 bg-white text-slate-400 hover:border-slate-100'
+                    ? 'border-primary bg-primary/10 text-white shadow-2xl' 
+                    : 'border-[#1e1e24] bg-[#0c0c0e]/50 text-gray-400 hover:border-gray-700'
                 }`}
               >
-                <div className="text-3xl">🎒</div>
-                <p className="font-extrabold text-sm uppercase tracking-tight">Anak Meow</p>
-                <p className="text-[10px] opacity-70 leading-tight font-medium">Bisa langsung masuk & lihat rekap</p>
+                <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center mx-auto border border-primary/25">
+                  <GraduationCap size={20} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-extrabold text-xs uppercase tracking-wider font-mono">Siswa (Student)</p>
+                  <p className="text-[9px] text-gray-500 uppercase mt-1 leading-tight font-mono">Melihat rekap & pengumuman</p>
+                </div>
               </button>
               <button
                 type="button"
                 onClick={() => setRole('guru')}
-                className={`p-6 rounded-[2rem] border-2 transition-all text-center space-y-3 ${
+                className={`p-6 rounded-2xl border transition-all text-center space-y-4 ${
                   role === 'guru' 
-                    ? 'border-primary bg-primary/5 text-primary shadow-lg shadow-primary/10' 
-                    : 'border-slate-50 bg-white text-slate-400 hover:border-slate-100'
+                    ? 'border-indigo-500 bg-indigo-500/10 text-white shadow-2xl' 
+                    : 'border-[#1e1e24] bg-[#0c0c0e]/50 text-gray-400 hover:border-gray-700'
                 }`}
               >
-                <div className="text-3xl">👩‍🏫</div>
-                <p className="font-extrabold text-sm uppercase tracking-tight">Guru Meow</p>
-                <p className="text-[10px] opacity-70 leading-tight font-medium">Butuh konfirmasi Admin</p>
+                <div className="w-10 h-10 bg-indigo-500/15 rounded-xl flex items-center justify-center mx-auto border border-indigo-500/25">
+                  <Shield size={20} className="text-indigo-400" />
+                </div>
+                <div>
+                  <p className="font-extrabold text-xs uppercase tracking-wider font-mono">Guru (Teacher)</p>
+                  <p className="text-[9px] text-gray-500 uppercase mt-1 leading-tight font-mono">Akses input nilai & voting</p>
+                </div>
               </button>
             </div>
           </div>
@@ -133,14 +150,14 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
               animate={{ opacity: 1, scale: 1 }}
               className="space-y-2"
             >
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest pl-1">Pilih Kelas</label>
+              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 font-mono">Pilih Kelas</label>
               <select 
                 value={selectedClass}
                 onChange={(e) => setSelectedClass(e.target.value)}
-                className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark font-bold outline-none appearance-none cursor-pointer"
+                className="w-full px-6 py-4 bg-[#111115] border border-[#1e1e24] text-white rounded-xl font-bold outline-none appearance-none cursor-pointer font-mono"
                 required
               >
-                <option value="">-- Pilih Kelas --</option>
+                <option value="">-- PILIH KELAS --</option>
                 {CLASSES.map(c => (
                   <option key={c} value={c}>{c}</option>
                 ))}
@@ -152,18 +169,18 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-5 primary-gradient text-white font-extrabold rounded-3xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 tracking-tight group"
+              className="w-full py-5 primary-gradient text-white font-black rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 tracking-widest uppercase font-mono italic"
             >
-              {loading ? 'Menyimpan...' : 'Mulai Meow!'}
-              <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              {loading ? 'MENYIMPAN...' : 'CONCLUDE MATRIX REGISTRATION'}
+              <ArrowRight size={18} />
             </button>
             <button
               type="button"
               onClick={handleLogout}
-              className="w-full py-4 text-slate-400 hover:text-rose-500 font-bold text-xs uppercase tracking-widest flex items-center justify-center gap-2 transition-all"
+              className="w-full py-4 text-gray-500 hover:text-red-400 font-bold text-[10px] uppercase tracking-widest flex items-center justify-center gap-2 transition-all font-mono"
             >
-              <LogOut size={16} />
-              Batal Meow
+              <LogOut size={14} />
+              Batal & Keluar
             </button>
           </div>
         </form>
