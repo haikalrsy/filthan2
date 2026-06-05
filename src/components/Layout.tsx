@@ -9,11 +9,11 @@ interface LayoutProps {
 
 export default function Layout({ profile }: LayoutProps) {
   return (
-    <div className="flex min-h-screen bg-[#030712] text-white relative">
+    <div className="flex min-h-screen bg-gray-50 text-gray-900 relative">
       {/* Background Orbs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none z-0">
-        <div className="absolute top-[10%] left-[10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]"></div>
-        <div className="absolute bottom-[10%] right-[10%] w-[40%] h-[40%] bg-indigo-500/5 rounded-full blur-[120px]"></div>
+        <div className="absolute top-[10%] left-[10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]"></div>
+        <div className="absolute bottom-[10%] right-[10%] w-[40%] h-[40%] bg-green-500/10 rounded-full blur-[120px]"></div>
       </div>
 
       {/* Sidebar - Left Menu */}

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { User } from '@supabase/supabase-js';
 import { motion } from 'motion/react';
-import { User as UserIcon, Shield, GraduationCap, ArrowRight, LogOut } from 'lucide-react';
+import { User as UserIcon, Shield, GraduationCap, ArrowRight, LogOut, Hash } from 'lucide-react';
 import { isAdmin } from '../config';
 
 interface CompleteProfileProps {
@@ -16,6 +16,7 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
   const [name, setName] = useState(user.user_metadata?.full_name || '');
   const [role, setRole] = useState<'guru' | 'siswa'>('siswa');
   const [selectedClass, setSelectedClass] = useState('');
+  const [nisn, setNisn] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -24,6 +25,16 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
     
     if (role === 'siswa' && !selectedClass) {
       alert('Silakan pilih kelas Anda.');
+      return;
+    }
+
+    if (role === 'siswa' && !nisn.trim()) {
+      alert('NISN wajib diisi untuk siswa.');
+      return;
+    }
+
+    if (role === 'siswa' && nisn.trim().length !== 10) {
+      alert('NISN harus terdiri dari 10 digit.');
       return;
     }
 
@@ -43,6 +54,7 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
           email: user.email!,
           role: finalRole,
           class: finalRole === 'siswa' ? selectedClass : null,
+          nisn: finalRole === 'siswa' ? nisn.trim() : null,
           is_approved: isApproved,
           is_pending: false
         }, { onConflict: 'email' });
@@ -65,26 +77,27 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] flex items-center justify-center p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6 relative overflow-hidden">
       {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] left-[-20%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-[#121214]/10 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.02)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
+        <div className="absolute bottom-[-20%] right-[-20%] w-[60%] h-[60%] bg-gray-200/50 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.02)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.02)_1px,transparent_1px)] bg-[size:30px_30px]"></div>
       </div>
 
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="max-w-md w-full bg-[#0a0a0b]/80 backdrop-blur-2xl rounded-3xl border border-[#1e1e24] shadow-2xl overflow-hidden relative z-10"
+        className="max-w-md w-full bg-white/80 backdrop-blur-2xl rounded-3xl border border-gray-200 shadow-xl overflow-hidden relative z-10"
       >
-        <div className="p-10 border-b border-[#1e1e24] text-center space-y-4">
-          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto border border-primary/20 shadow-2xl">
+        <div className="p-10 border-b border-gray-200 text-center space-y-4">
+          <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto border border-primary/20 shadow-lg">
             <UserIcon size={32} className="text-primary animate-pulse" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-white tracking-widest uppercase italic font-mono">Lengkapi Profil</h1>
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-widest uppercase italic font-mono">Lengkapi Profil</h1>
             <p className="text-[10px] text-gray-500 font-extrabold tracking-widest uppercase mt-1 font-mono">Daftarkan Kredensial Akademik Anda</p>
+            <p className="text-[10px] text-primary/80 font-bold tracking-widest uppercase mt-2 font-mono">{user.email}</p>
           </div>
         </div>
 
@@ -97,7 +110,7 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
                 type="text" 
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full pl-14 pr-6 py-4 bg-[#111115] border border-[#1e1e24] rounded-xl text-white outline-none font-bold placeholder:text-gray-600 focus:border-primary transition-all font-mono"
+                className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 outline-none font-bold placeholder:text-gray-400 focus:border-primary transition-all font-mono focus:bg-white"
                 placeholder="NAMA LENGKAP"
                 required
               />
@@ -112,8 +125,8 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
                 onClick={() => setRole('siswa')}
                 className={`p-6 rounded-2xl border transition-all text-center space-y-4 ${
                   role === 'siswa' 
-                    ? 'border-primary bg-primary/10 text-white shadow-2xl' 
-                    : 'border-[#1e1e24] bg-[#0c0c0e]/50 text-gray-400 hover:border-gray-700'
+                    ? 'border-primary bg-primary/10 text-gray-900 shadow-lg' 
+                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'
                 }`}
               >
                 <div className="w-10 h-10 bg-primary/15 rounded-xl flex items-center justify-center mx-auto border border-primary/25">
@@ -129,8 +142,8 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
                 onClick={() => setRole('guru')}
                 className={`p-6 rounded-2xl border transition-all text-center space-y-4 ${
                   role === 'guru' 
-                    ? 'border-indigo-500 bg-indigo-500/10 text-white shadow-2xl' 
-                    : 'border-[#1e1e24] bg-[#0c0c0e]/50 text-gray-400 hover:border-gray-700'
+                    ? 'border-indigo-500 bg-indigo-500/10 text-gray-900 shadow-lg' 
+                    : 'border-gray-200 bg-gray-50 text-gray-500 hover:border-gray-300'
                 }`}
               >
                 <div className="w-10 h-10 bg-indigo-500/15 rounded-xl flex items-center justify-center mx-auto border border-indigo-500/25">
@@ -144,24 +157,57 @@ export default function CompleteProfile({ user, onComplete }: CompleteProfilePro
             </div>
           </div>
 
+          {isAdmin(user.email) && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="p-4 mt-4 border border-amber-500/30 bg-amber-500/10 rounded-xl"
+            >
+              <p className="text-amber-500 text-[10px] font-bold uppercase tracking-widest font-mono text-center">
+                Sistem mendeteksi Anda sebagai Admin. Klik "CONCLUDE" untuk masuk.
+              </p>
+            </motion.div>
+          )}
+
           {role === 'siswa' && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="space-y-2"
+              className="space-y-6"
             >
-              <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 font-mono">Pilih Kelas</label>
-              <select 
-                value={selectedClass}
-                onChange={(e) => setSelectedClass(e.target.value)}
-                className="w-full px-6 py-4 bg-[#111115] border border-[#1e1e24] text-white rounded-xl font-bold outline-none appearance-none cursor-pointer font-mono"
-                required
-              >
-                <option value="">-- PILIH KELAS --</option>
-                {CLASSES.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 font-mono">NISN (Nomor Induk Siswa Nasional)</label>
+                <div className="relative">
+                  <Hash className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                  <input 
+                    type="text" 
+                    value={nisn}
+                    onChange={(e) => setNisn(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                    className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 outline-none font-bold placeholder:text-gray-400 focus:border-primary transition-all font-mono focus:bg-white"
+                    placeholder="10 DIGIT NISN"
+                    required
+                    maxLength={10}
+                  />
+                </div>
+                <p className="text-[9px] text-gray-400 font-mono pl-1 uppercase tracking-widest">
+                  {nisn.length}/10 digit — NISN digunakan untuk pencarian hasil keputusan
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="block text-xs font-bold text-gray-400 uppercase tracking-widest pl-1 font-mono">Pilih Kelas</label>
+                <select 
+                  value={selectedClass}
+                  onChange={(e) => setSelectedClass(e.target.value)}
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-200 text-gray-900 rounded-xl font-bold outline-none appearance-none cursor-pointer font-mono focus:bg-white"
+                  required
+                >
+                  <option value="">-- PILIH KELAS --</option>
+                  {CLASSES.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
             </motion.div>
           )}
 

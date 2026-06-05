@@ -20,17 +20,17 @@ export default function PublicCheck() {
     setResult(null);
 
     try {
-      // 1. Find the student profile - EXACT MATCH for name as per user request
+      // 1. Find the student profile by NISN
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('uid, name, role, class, email, nik')
+        .select('uid, name, role, class, email, nisn')
         .eq('role', 'siswa')
-        .or(`name.eq."${searchTerm}",email.eq."${searchTerm}",nik.eq."${searchTerm}"`)
+        .eq('nisn', searchTerm.trim())
         .maybeSingle();
 
       if (profileError) throw profileError;
       if (!profile) {
-        setError('Data siswa tidak ditemukan. Periksa kembali Nama, Email, atau NIK Anda.');
+        setError('Data siswa tidak ditemukan. Pastikan NISN yang Anda masukkan benar (10 digit).');
         return;
       }
 
@@ -54,13 +54,19 @@ export default function PublicCheck() {
           message: 'Hasil keputusan belum diumumkan atau sesi voting masih berlangsung.'
         });
       } else {
-        // Calculate majority decision
-        const counts = votes.reduce((acc: any, curr: any) => {
-          acc[curr.decision] = (acc[curr.decision] || 0) + 1;
-          return acc;
-        }, {});
+        // Calculate majority decision (Opsi B: must be strictly > 50% positive to pass)
+        const positiveCount = votes.filter((v: any) => ['lulus', 'naik'].includes(v.decision)).length;
+        const negativeCount = votes.filter((v: any) => ['tidak_lulus', 'tinggal'].includes(v.decision)).length;
 
-        const finalDecision = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+        // Find what type of vote this is based on what exists
+        const isGrade12 = votes.some((v: any) => ['lulus', 'tidak_lulus'].includes(v.decision));
+
+        let finalDecision = '';
+        if (positiveCount > negativeCount) {
+          finalDecision = isGrade12 ? 'lulus' : 'naik';
+        } else {
+          finalDecision = isGrade12 ? 'tidak_lulus' : 'tinggal';
+        }
         
         setResult({
           profile,
@@ -76,7 +82,7 @@ export default function PublicCheck() {
   };
 
   return (
-    <div className="min-h-screen bg-dark flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-gray-50 flex flex-col items-center justify-center p-6 relative overflow-hidden font-sans">
       {/* Decorative Background Elements */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px]"></div>
@@ -91,7 +97,7 @@ export default function PublicCheck() {
       >
         <button 
           onClick={() => navigate('/')}
-          className="mb-8 flex items-center gap-2 text-gray-500 hover:text-white transition-all font-bold group bg-surface-lighter/50 px-4 py-2 rounded-full border border-border"
+          className="mb-8 flex items-center gap-2 text-gray-500 hover:text-gray-900 transition-all font-bold group bg-surface-lighter/50 px-4 py-2 rounded-full border border-border"
         >
           <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Back to Base
         </button>
@@ -104,7 +110,7 @@ export default function PublicCheck() {
                 <GraduationCap size={40} className="text-white" />
               </div>
               <h1 className="text-4xl font-extrabold mb-2 tracking-tighter uppercase font-mono italic">NeoVision Check</h1>
-              <p className="opacity-70 font-medium text-sm tracking-widest uppercase">Student Decision Authority Portal</p>
+              <p className="opacity-70 font-medium text-sm tracking-widest uppercase">Cek Hasil Keputusan via NISN</p>
             </div>
           </div>
 
@@ -113,10 +119,11 @@ export default function PublicCheck() {
               <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500" size={20} />
               <input 
                 type="text" 
-                placeholder="Enter Full Legal Name..."
+                placeholder="Masukkan NISN (10 digit)..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-14 pr-32 py-5 bg-surface-lighter border border-border rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none font-bold text-lg transition-all text-white placeholder:text-gray-600"
+                onChange={(e) => setSearchTerm(e.target.value.replace(/\D/g, '').slice(0, 10))}
+                className="w-full pl-14 pr-32 py-5 bg-gray-50 border border-gray-200 rounded-2xl focus:border-primary focus:ring-4 focus:ring-primary/10 outline-none font-bold text-lg transition-all text-gray-900 placeholder:text-gray-400 focus:bg-white font-mono"
+                maxLength={10}
               />
               <button 
                 type="submit"
@@ -149,25 +156,29 @@ export default function PublicCheck() {
                 animate={{ opacity: 1, scale: 1 }}
                 className="space-y-6"
               >
-                <div className="bg-surface-lighter p-8 rounded-3xl border border-border">
-                  <div className="grid grid-cols-2 gap-y-6 gap-x-8">
+                <div className="bg-gray-50 p-8 rounded-3xl border border-gray-200">
+                  <div className="grid grid-cols-3 gap-y-6 gap-x-6">
                     <div>
                       <p className="text-[10px] text-primary font-black uppercase tracking-widest mb-1.5 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-primary rounded-full"></span> Student Identity
+                        <span className="w-1.5 h-1.5 bg-primary rounded-full"></span> Nama Siswa
                       </p>
-                      <p className="font-bold text-lg text-white font-mono uppercase italic">{result.profile.name}</p>
+                      <p className="font-bold text-lg text-gray-900 font-mono uppercase italic">{result.profile.name}</p>
                     </div>
                     <div>
-                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1.5">Class Registry</p>
-                      <p className="font-bold text-lg text-white font-mono">{result.profile.class}</p>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1.5">NISN</p>
+                      <p className="font-bold text-lg text-gray-900 font-mono">{result.profile.nisn}</p>
+                    </div>
+                    <div>
+                      <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1.5">Kelas</p>
+                      <p className="font-bold text-lg text-gray-900 font-mono">{result.profile.class}</p>
                     </div>
                   </div>
                 </div>
 
                 {result.status === 'PENDING' ? (
-                  <div className="bg-yellow-500/5 border border-yellow-500/10 p-12 rounded-3xl text-center">
-                    <Clock size={48} className="mx-auto text-yellow-500/50 mb-4 animate-pulse" />
-                    <p className="text-yellow-200/70 font-bold text-sm tracking-wide">{result.message}</p>
+                  <div className="bg-yellow-50 border border-yellow-200 p-12 rounded-3xl text-center">
+                    <Clock size={48} className="mx-auto text-yellow-500 mb-4 animate-pulse" />
+                    <p className="text-yellow-700 font-bold text-sm tracking-wide">{result.message}</p>
                   </div>
                 ) : (
                   <div className={`p-10 rounded-3xl text-center border-2 overflow-hidden relative group ${

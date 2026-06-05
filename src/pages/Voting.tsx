@@ -17,6 +17,7 @@ export default function Voting({ profile }: { profile: any }) {
   const [targetGrade, setTargetGrade] = useState<number>(10);
   const [showSessionModal, setShowSessionModal] = useState(false);
   const [selectedStudentVotes, setSelectedStudentVotes] = useState<any>(null);
+  const [totalGuru, setTotalGuru] = useState<number>(0);
 
   const [isStarting, setIsStarting] = useState(false);
 
@@ -34,8 +35,20 @@ export default function Voting({ profile }: { profile: any }) {
       
       setSessions(data || []);
       
+      
       const active = data?.find(s => s.status === 'active');
       if (active) setActiveSession(active);
+
+      // Fetch total approved gurus
+      const { count: guruCount, error: guruError } = await supabase
+        .from('profiles')
+        .select('*', { count: 'exact', head: true })
+        .eq('role', 'guru')
+        .eq('is_approved', true);
+      
+      if (!guruError && guruCount !== null) {
+        setTotalGuru(guruCount);
+      }
     } catch (err) {
       console.error('System error:', err);
     }
@@ -184,7 +197,49 @@ export default function Voting({ profile }: { profile: any }) {
   };
 
   const handleCloseSession = async (sessionId: string) => {
+    if (!activeSession) return;
+    
     try {
+      // 1. Calculate how many students exist in the target grade
+      const classesInGrade = CLASSES.filter(c => getGrade(c) === activeSession.target_grade);
+      
+      // Get from profiles
+      const { data: profileSiswa } = await supabase
+        .from('profiles')
+        .select('uid, name')
+        .eq('role', 'siswa')
+        .in('class', classesInGrade);
+        
+      // Get from students (master data)
+      const { data: rawStudents } = await supabase
+        .from('students')
+        .select('id, name')
+        .in('class', classesInGrade);
+        
+      // Merge unique students
+      const mergedStudents = [
+        ...(profileSiswa?.map(s => ({ id: s.uid, name: s.name })) || []),
+        ...(rawStudents?.map(s => ({ id: s.id, name: s.name })) || [])
+      ].reduce((acc: any[], current) => {
+        const x = acc.find(item => item.name.toLowerCase() === current.name.toLowerCase());
+        if (!x) return acc.concat([current]);
+        return acc;
+      }, []);
+
+      const totalStudents = mergedStudents.length;
+      const expectedTotalVotes = totalStudents * totalGuru;
+
+      // 2. Count total votes in this session
+      const { count: currentTotalVotes } = await supabase
+        .from('votes')
+        .select('*', { count: 'exact', head: true })
+        .eq('session_id', sessionId);
+
+      if (currentTotalVotes !== null && currentTotalVotes < expectedTotalVotes) {
+        alert(`Sesi tidak bisa ditutup! Masih ada guru yang belum menyelesaikan voting.\n\nProgress Total Voting: ${currentTotalVotes} dari ${expectedTotalVotes} suara yang dibutuhkan.`);
+        return;
+      }
+
       const { error } = await supabase
         .from('voting_sessions')
         .update({ status: 'closed' })
@@ -192,8 +247,9 @@ export default function Voting({ profile }: { profile: any }) {
       if (error) throw error;
       setActiveSession(null);
       fetchSessions();
+      alert('Sesi berhasil ditutup. Hasil telah dikalkulasi dan dipublikasikan.');
     } catch (err: any) {
-      alert(err.message);
+      alert('Gagal menutup sesi: ' + err.message);
     }
   };
 
@@ -259,7 +315,7 @@ export default function Voting({ profile }: { profile: any }) {
                {activeSession ? 'Sesi Voting Aktif' : 'Protokol Keputusan'}
              </span>
            </div>
-          <h1 className="text-4xl font-extrabold text-dark tracking-tight leading-none">
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight leading-none">
             {activeSession?.target_grade === 12 ? 'Kelulusan' : 'Kenaikan'} <span className="text-primary italic">Siswa</span>
           </h1>
           <p className="text-slate-500 mt-2 font-medium text-sm">
@@ -307,7 +363,7 @@ export default function Voting({ profile }: { profile: any }) {
             <div className="w-20 h-20 bg-primary/10 rounded-3xl border border-primary/20 flex items-center justify-center mx-auto mb-6 shadow-xl shadow-primary/10">
               <Clock className="text-primary" size={40} />
             </div>
-            <h2 className="text-2xl font-bold text-dark tracking-tight">Sesi Belum Tersedia</h2>
+            <h2 className="text-2xl font-bold text-gray-900 tracking-tight">Sesi Belum Tersedia</h2>
             <p className="text-slate-400 mt-2 font-medium max-w-sm mx-auto leading-relaxed">
               Tim administrasi belum membuka sesi voting untuk periode ini. Harap tunggu instruksi lebih lanjut.
             </p>
@@ -402,7 +458,7 @@ export default function Voting({ profile }: { profile: any }) {
             >
               <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex items-center justify-between">
                 <div>
-                  <h2 className="text-xl font-bold text-dark leading-none">Manifest Siswa</h2>
+                  <h2 className="text-xl font-bold text-gray-900 leading-none">Manifest Siswa</h2>
                   <p className="text-xs text-slate-400 mt-1 font-medium italic">Menampilkan daftar siswa kelas {selectedClass || '...'}</p>
                 </div>
                 <button 
@@ -440,7 +496,8 @@ export default function Voting({ profile }: { profile: any }) {
                       
                       const totalVotes = positiveCount + negativeCount;
                       const consensus = totalVotes > 0 ? Math.round((positiveCount / totalVotes) * 100) : 0;
-                      const isAutoApproved = positiveCount >= 10;
+                      const isFullyVoted = totalVotes === totalGuru;
+                      const isApproved = isFullyVoted && positiveCount > negativeCount;
 
                       return (
                         <motion.tr 
@@ -448,12 +505,12 @@ export default function Voting({ profile }: { profile: any }) {
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
                           transition={{ delay: 0.1 + idx * 0.03 }}
-                          className={`group transition-all ${isAutoApproved ? 'bg-emerald-50/30' : 'hover:bg-slate-50/50'}`}
+                          className={`group transition-all ${isApproved ? 'bg-emerald-50/30' : 'hover:bg-slate-50/50'}`}
                         >
                           <td className="px-8 py-6">
                             <div className="flex items-center gap-4">
                               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-bold text-sm border-2 transition-all group-hover:scale-110 ${
-                                isAutoApproved ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-slate-50 text-slate-400 border-slate-100'
+                                isApproved ? 'bg-emerald-500 text-white border-emerald-400' : 'bg-slate-50 text-slate-400 border-slate-100'
                               }`}>
                                 {student.name.charAt(0)}
                               </div>
@@ -461,9 +518,9 @@ export default function Voting({ profile }: { profile: any }) {
                                 <p className="font-bold text-slate-700 text-sm tracking-tight mb-1 group-hover:text-primary transition-colors">{student.name}</p>
                                 <div className="flex items-center gap-2">
                                   <span className="text-[10px] text-slate-400 font-medium italic">{student.nis || 'Tanpa NIS'}</span>
-                                  {isAutoApproved && (
+                                  {isApproved && (
                                     <span className="flex items-center gap-1 bg-emerald-500/10 text-emerald-600 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase">
-                                      <ShieldCheck size={10} /> Auto-Lulus
+                                      <ShieldCheck size={10} /> Keputusan Bulat
                                     </span>
                                   )}
                                 </div>
@@ -477,7 +534,9 @@ export default function Voting({ profile }: { profile: any }) {
                                   <span className="text-emerald-500">+{positiveCount}</span>
                                   <span className="text-rose-400">-{negativeCount}</span>
                                 </div>
-                                <span className="text-slate-400 font-mono">{consensus}%</span>
+                                <span className={`font-mono px-2 py-0.5 rounded-full ${totalVotes === totalGuru ? 'bg-emerald-50 text-emerald-500' : 'bg-slate-100 text-slate-500'}`}>
+                                  {totalVotes}/{totalGuru} Guru
+                                </span>
                               </div>
                               <div className="w-32 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                 <motion.div 
@@ -561,7 +620,7 @@ export default function Voting({ profile }: { profile: any }) {
       )}
 
       {showSessionModal && (
-        <div className="fixed inset-0 bg-dark/60 backdrop-blur-xl z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-xl z-50 flex items-center justify-center p-6">
           <motion.div 
             initial={{ opacity: 0, y: 50, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -581,7 +640,7 @@ export default function Voting({ profile }: { profile: any }) {
                   placeholder="Contoh: Rapat Pleno Semester Genap"
                   value={newSessionTitle}
                   onChange={(e) => setNewSessionTitle(e.target.value)}
-                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-lg focus:shadow-primary/5 text-dark outline-none font-bold placeholder:text-slate-300 transition-all font-mono italic"
+                  className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-lg focus:shadow-primary/5 text-gray-900 outline-none font-bold placeholder:text-slate-300 transition-all font-mono italic"
                 />
               </div>
 
@@ -631,7 +690,7 @@ export default function Voting({ profile }: { profile: any }) {
       )}
 
       {selectedStudentVotes && (
-        <div className="fixed inset-0 bg-dark/60 backdrop-blur-xl z-[60] flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-xl z-[60] flex items-center justify-center p-6">
           <motion.div 
             initial={{ opacity: 0, y: 100, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}

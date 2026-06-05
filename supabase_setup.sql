@@ -17,6 +17,7 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT true;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_pending BOOLEAN DEFAULT false;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS class TEXT;
 ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nik TEXT;
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS nisn TEXT;
 
 -- Update role constraint if it exists
 DO $$ 
@@ -109,10 +110,17 @@ DROP POLICY IF EXISTS "Public profiles are viewable by everyone." ON profiles;
 DROP POLICY IF EXISTS "Users can insert their own profile." ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile." ON profiles;
 DROP POLICY IF EXISTS "Admins can manage all profiles." ON profiles;
+DROP POLICY IF EXISTS "Admins can insert any profile." ON profiles;
+DROP POLICY IF EXISTS "Admins can update any profile." ON profiles;
+DROP POLICY IF EXISTS "Admins can delete any profile." ON profiles;
 CREATE POLICY "Public profiles are viewable by everyone." ON profiles FOR SELECT USING (true);
 CREATE POLICY "Users can insert their own profile." ON profiles FOR INSERT WITH CHECK (auth.uid() = uid);
 CREATE POLICY "Users can update own profile." ON profiles FOR UPDATE USING (auth.uid() = uid);
-CREATE POLICY "Admins can manage all profiles." ON profiles FOR ALL USING (is_admin());
+-- NOTE: Do NOT use FOR ALL here! It causes infinite recursion because is_admin() queries profiles.
+-- Split into separate INSERT/UPDATE/DELETE policies instead.
+CREATE POLICY "Admins can insert any profile." ON profiles FOR INSERT WITH CHECK (is_admin());
+CREATE POLICY "Admins can update any profile." ON profiles FOR UPDATE USING (is_admin());
+CREATE POLICY "Admins can delete any profile." ON profiles FOR DELETE USING (is_admin());
 
 -- Students Policies
 DROP POLICY IF EXISTS "Students are viewable by authenticated users." ON students;

@@ -144,7 +144,7 @@ export default function UserManagement() {
                Manajemen Pengguna
              </span>
            </div>
-          <h1 className="text-4xl font-extrabold text-dark tracking-tight italic">Kelola <span className="text-primary">Akses</span></h1>
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight italic">Kelola <span className="text-primary">Akses</span></h1>
           <p className="text-slate-500 mt-2 font-medium text-sm">Atur hak akses dan identitas guru maupun siswa.</p>
         </motion.div>
         
@@ -165,7 +165,7 @@ export default function UserManagement() {
             placeholder="Cari berdasarkan nama atau email..." 
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-sm font-bold text-dark outline-none placeholder:text-slate-300 transition-all"
+            className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-sm font-bold text-gray-900 outline-none placeholder:text-slate-300 transition-all"
           />
         </div>
         
@@ -223,7 +223,7 @@ export default function UserManagement() {
                         {user.name.charAt(0)}
                       </div>
                       <div>
-                        <p className="font-bold text-dark text-sm tracking-tight mb-1">{user.name}</p>
+                        <p className="font-bold text-gray-900 text-sm tracking-tight mb-1">{user.name}</p>
                         <p className="text-[11px] text-slate-400 font-medium flex items-center gap-1.5 grayscale group-hover:grayscale-0 transition-all">
                           <Mail size={12} className="text-primary" /> {user.email}
                         </p>
@@ -323,7 +323,7 @@ export default function UserManagement() {
                     type="text" 
                     value={newUser.name}
                     onChange={(e) => setNewUser({...newUser, name: e.target.value})}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold placeholder:text-slate-300 transition-all"
+                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-gray-900 outline-none font-bold placeholder:text-slate-300 transition-all"
                     placeholder="Nama lengkap..."
                     required
                   />
@@ -337,7 +337,7 @@ export default function UserManagement() {
                     type="email" 
                     value={newUser.email}
                     onChange={(e) => setNewUser({...newUser, email: e.target.value})}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold placeholder:text-slate-300 transition-all"
+                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-gray-900 outline-none font-bold placeholder:text-slate-300 transition-all"
                     placeholder="email@sekolah.sch.id"
                     required
                   />
@@ -348,7 +348,7 @@ export default function UserManagement() {
                 <select 
                   value={newUser.role}
                   onChange={(e) => setNewUser({...newUser, role: e.target.value as any})}
-                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold transition-all cursor-pointer"
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-gray-900 outline-none font-bold transition-all cursor-pointer"
                 >
                   <option value="guru">GURU / STAFF</option>
                   <option value="siswa">SISWA</option>
@@ -366,7 +366,7 @@ export default function UserManagement() {
                   <select 
                     value={newUser.class}
                     onChange={(e) => setNewUser({...newUser, class: e.target.value})}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold transition-all cursor-pointer"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-gray-900 outline-none font-bold transition-all cursor-pointer"
                     required
                   >
                     <option value="">-- PILIH KELAS --</option>
@@ -419,7 +419,7 @@ export default function UserManagement() {
                     type="text" 
                     value={editingUser.name}
                     onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold placeholder:text-slate-300 transition-all"
+                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-gray-900 outline-none font-bold placeholder:text-slate-300 transition-all"
                     placeholder="Nama terbaru..."
                     required
                   />
@@ -433,7 +433,7 @@ export default function UserManagement() {
                     type="email" 
                     value={editingUser.email}
                     onChange={(e) => setEditingUser({...editingUser, email: e.target.value})}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold placeholder:text-slate-300 transition-all"
+                    className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-gray-900 outline-none font-bold placeholder:text-slate-300 transition-all"
                     placeholder="email@baru.sys"
                     required
                   />
@@ -444,7 +444,7 @@ export default function UserManagement() {
                 <select 
                   value={editingUser.role}
                   onChange={(e) => setEditingUser({...editingUser, role: e.target.value as any})}
-                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold transition-all cursor-pointer"
+                  className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-gray-900 outline-none font-bold transition-all cursor-pointer"
                 >
                   <option value="guru">GURU / STAFF</option>
                   <option value="siswa">SISWA</option>
@@ -462,7 +462,7 @@ export default function UserManagement() {
                   <select 
                     value={editingUser.class || ''}
                     onChange={(e) => setEditingUser({...editingUser, class: e.target.value})}
-                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-dark outline-none font-bold transition-all cursor-pointer"
+                    className="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-3xl focus:bg-white focus:border-primary focus:shadow-xl focus:shadow-primary/5 text-gray-900 outline-none font-bold transition-all cursor-pointer"
                     required
                   >
                     <option value="">-- PILIH KELAS --</option>

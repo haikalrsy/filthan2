@@ -33,20 +33,8 @@ export default function Register() {
       if (signUpError) throw signUpError;
 
       if (data.user) {
-        // 2. Create profile in database
-        const role = isAdmin(email) ? 'admin' : 'guru';
-        
-        const { error: profileError } = await supabase.from('profiles').insert({
-          uid: data.user.id,
-          name: name,
-          email: email,
-          role: role,
-          created_at: new Date().toISOString()
-        });
-
-        if (profileError) throw profileError;
-        
-        // Success!
+        // Success! Redirect to /app which will automatically route
+        // the user to /complete-profile to securely build their profile.
         navigate('/app');
       }
     } catch (err: any) {
@@ -57,7 +45,7 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[#030712] p-6 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6 relative overflow-hidden">
       {/* Background Orbs */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-[-20%] right-[-20%] w-[60%] h-[60%] bg-primary/10 rounded-full blur-[120px] animate-pulse"></div>
@@ -67,7 +55,7 @@ export default function Register() {
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 40 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
-        className="max-w-md w-full bg-[#0a0a0b]/80 backdrop-blur-2xl rounded-3xl shadow-2xl border border-[#1e1e24] overflow-hidden relative z-10"
+        className="max-w-md w-full bg-white/80 backdrop-blur-2xl rounded-3xl shadow-xl border border-gray-200 overflow-hidden relative z-10"
       >
         <div className="primary-gradient p-12 text-white text-center relative overflow-hidden">
           <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16"></div>
@@ -92,14 +80,14 @@ export default function Register() {
 
           <form onSubmit={handleRegister} className="space-y-6">
             <div className="space-y-3">
-              <label className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] pl-1 font-mono italic">Full Designation</label>
+              <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] pl-1 font-mono italic">Full Designation</label>
               <div className="relative group">
-                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-primary transition-colors" size={16} />
+                <User className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" size={16} />
                 <input 
                   type="text" 
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-14 pr-6 py-4 bg-[#111115] border border-[#1e1e24] rounded-xl focus:border-primary/50 text-white outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-800 transition-all shadow-inner"
+                  className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary/50 text-gray-900 outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-400 transition-all shadow-inner focus:bg-white"
                   placeholder="IDENTIFIER NAME"
                   required
                 />
@@ -107,14 +95,14 @@ export default function Register() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] pl-1 font-mono italic">System Identifier</label>
+              <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] pl-1 font-mono italic">System Identifier</label>
               <div className="relative group">
-                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-primary transition-colors" size={16} />
+                <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" size={16} />
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full pl-14 pr-6 py-4 bg-[#111115] border border-[#1e1e24] rounded-xl focus:border-primary/50 text-white outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-800 transition-all shadow-inner"
+                  className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary/50 text-gray-900 outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-400 transition-all shadow-inner focus:bg-white"
                   placeholder="USER@EDUCORE.SYS"
                   required
                 />
@@ -122,14 +110,14 @@ export default function Register() {
             </div>
 
             <div className="space-y-3">
-              <label className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] pl-1 font-mono italic">Security Key</label>
+              <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] pl-1 font-mono italic">Security Key</label>
               <div className="relative group">
-                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-primary transition-colors" size={16} />
+                <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" size={16} />
                 <input 
                   type="password" 
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full pl-14 pr-6 py-4 bg-[#111115] border border-[#1e1e24] rounded-xl focus:border-primary/50 text-white outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-800 transition-all shadow-inner"
+                  className="w-full pl-14 pr-6 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary/50 text-gray-900 outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-400 transition-all shadow-inner focus:bg-white"
                   placeholder="MIN 6 CHARS"
                   required
                 />
@@ -153,9 +141,9 @@ export default function Register() {
           </form>
 
           <div className="mt-10 text-center">
-            <p className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] font-mono italic">
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] font-mono italic">
               Existing Unit?{' '}
-              <Link to="/login" className="text-primary hover:text-white transition-all underline decoration-primary/30 underline-offset-4">
+              <Link to="/login" className="text-primary hover:text-gray-900 transition-all underline decoration-primary/30 underline-offset-4">
                 Access Terminal
               </Link>
             </p>

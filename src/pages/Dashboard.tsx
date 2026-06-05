@@ -24,44 +24,71 @@ export default function Dashboard({ profile }: DashboardProps) {
   const navigate = useNavigate();
 
   const fetchStats = async () => {
+    console.log('[Dashboard] fetchStats called, profile:', profile?.role, profile?.uid, profile?.email);
     try {
+      // Check current auth session first
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('[Dashboard] Current session:', !!session, session?.user?.email);
+
       if (profile?.role === 'siswa') {
-        // Students might see their own graduation status here in the future
         const { data: sessionRes } = await supabase
           .from('voting_sessions')
           .select('*')
           .eq('status', 'active')
+          .limit(1)
           .maybeSingle();
         setActiveSession(sessionRes);
       } else {
-        // Admin/Guru stats
-        const [usersRes, studentsRes, sessionRes, allSessionsRes] = await Promise.all([
-          supabase.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'guru'),
-          supabase.from('students').select('*', { count: 'exact', head: true }),
-          supabase.from('voting_sessions').select('*').eq('status', 'active').maybeSingle(),
-          supabase.from('voting_sessions').select('*', { count: 'exact', head: true })
-        ]);
+        // Helper to add timeout to Supabase queries
+        const withTimeout = <T,>(promise: Promise<T>, ms = 5000): Promise<T> =>
+          Promise.race([
+            promise,
+            new Promise<never>((_, reject) => setTimeout(() => reject(new Error(`Query timeout ${ms}ms`)), ms))
+          ]);
 
-        if (usersRes.error) throw usersRes.error;
-        if (studentsRes.error) throw studentsRes.error;
-        
+        // Fetch all profiles data for reliable counting
+        const usersRes = await withTimeout(supabase.from('profiles').select('id, role'));
+        console.log('[Dashboard] profiles query result:', JSON.stringify({ 
+          data_length: usersRes.data?.length, 
+          error: usersRes.error,
+          status: usersRes.status 
+        }));
+
+        const sessionRes = await withTimeout(
+          supabase.from('voting_sessions').select('*').eq('status', 'active').limit(1).maybeSingle()
+        );
+
+        const allSessionsRes = await withTimeout(supabase.from('voting_sessions').select('id'));
+        console.log('[Dashboard] sessions query result:', JSON.stringify({
+          data_length: allSessionsRes.data?.length,
+          error: allSessionsRes.error,
+          status: allSessionsRes.status
+        }));
+
         if (sessionRes.data) setActiveSession(sessionRes.data);
 
-        setStats({
-          totalUsers: usersRes.count || 0,
-          totalStudents: studentsRes.count || 0,
-          activeSessions: allSessionsRes.count || 0
-        });
+        // Count from the actual data
+        const allProfiles = usersRes.data || [];
+        const siswaCount = allProfiles.filter((p: any) => p.role === 'siswa').length;
+
+        const newStats = {
+          totalUsers: allProfiles.length,
+          totalStudents: siswaCount,
+          activeSessions: allSessionsRes.data?.length || 0
+        };
+        console.log('[Dashboard] Setting stats:', newStats);
+        setStats(newStats);
       }
     } catch (err: any) {
-      console.error(err);
-      setError(err.message);
+      console.error('[Dashboard] Error fetching stats:', err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // Always attempt to fetch stats - don't wait for profile
+    // The SELECT policies allow everyone to read, so this works even without auth
     fetchStats();
   }, [profile]);
 
@@ -92,22 +119,32 @@ export default function Dashboard({ profile }: DashboardProps) {
                  Authentication Protocol
                </span>
              </div>
-            <h1 className="text-4xl font-extrabold text-white tracking-tight italic font-display">Halo, <span className="text-primary">{profile?.name || 'Authorized User'}</span>!</h1>
-            <p className="text-gray-500 mt-2 font-black text-[10px] uppercase tracking-[0.3em] font-mono leading-none italic">
-              Grid Access Synchronization: <span className="text-primary">Secured</span>
-            </p>
+            <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight italic font-display">Halo, <span className="text-primary">{profile?.name || 'Authorized User'}</span>!</h1>
+            <div className="flex items-center gap-4 mt-2">
+              <p className="text-gray-600 font-black text-[10px] uppercase tracking-[0.3em] font-mono leading-none italic">
+                Grid Access Synchronization: <span className="text-primary">Secured</span>
+              </p>
+              {profile?.nisn && (
+                <>
+                  <div className="h-3 w-px bg-gray-300"></div>
+                  <p className="text-gray-600 font-black text-[10px] uppercase tracking-[0.3em] font-mono leading-none italic">
+                    NISN: <span className="text-primary tracking-widest">{profile.nisn}</span>
+                  </p>
+                </>
+              )}
+            </div>
           </motion.div>
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-4 bg-[#111115] px-6 py-4 rounded-xl shadow-lg border border-[#1e1e24]"
+            className="flex items-center gap-4 bg-white px-6 py-4 rounded-xl shadow-lg border border-gray-200"
           >
             <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner">
               <Calendar size={18} />
             </div>
             <div>
-              <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.3em] leading-none mb-1 font-mono">Temporal Grid</p>
-              <span className="text-[11px] font-black text-gray-300 uppercase tracking-widest font-mono">
+              <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none mb-1 font-mono">Temporal Grid</p>
+              <span className="text-[11px] font-black text-gray-700 uppercase tracking-widest font-mono">
                 {format(new Date(), 'dd.MM.yyyy', { locale: id })}
               </span>
             </div>
@@ -118,27 +155,27 @@ export default function Dashboard({ profile }: DashboardProps) {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-card p-12 relative overflow-hidden group border-[#1e1e24] bg-[#0a0a0b]/40 shadow-2xl"
+            className="glass-card p-12 relative overflow-hidden group"
           >
-            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-[100px] -mr-48 -mt-48 group-hover:bg-primary/20 transition-colors" />
+            <div className="absolute top-0 right-0 w-96 h-96 bg-primary/10 rounded-full blur-[100px] -mr-48 -mt-48 group-hover:bg-primary/20 transition-colors" />
             
             <div className="relative z-10 text-center max-w-2xl mx-auto space-y-8">
-              <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto shadow-2xl border border-primary/20">
+              <div className="w-20 h-20 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto shadow-xl border border-primary/20">
                 <GraduationCap size={40} />
               </div>
               <div className="space-y-4">
-                <h2 className="text-3xl font-black text-white tracking-widest uppercase italic font-mono italic">Decision Registry Alpha</h2>
-                <p className="text-gray-500 font-mono text-xs leading-relaxed uppercase tracking-[0.2em] italic">
+                <h2 className="text-3xl font-black text-gray-900 tracking-widest uppercase italic font-mono italic">Decision Registry Alpha</h2>
+                <p className="text-gray-600 font-mono text-xs leading-relaxed uppercase tracking-[0.2em] italic">
                   Status Kelulusan Anda sedang dalam tahap sinkronisasi data oleh Dewan Guru. Semua metrik penilaian sedang diproses dalam matriks keputusan.
                 </p>
               </div>
               <div className="flex items-center justify-center gap-6">
-                <div className="bg-[#111115] p-6 rounded-2xl border border-[#1e1e24] flex-1">
-                  <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.3em] mb-2 font-mono">Current Sector</p>
-                  <p className="text-xl font-black text-white font-display tracking-widest">{profile.class}</p>
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex-1">
+                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2 font-mono">Current Sector</p>
+                  <p className="text-xl font-black text-gray-900 font-display tracking-widest">{profile.class}</p>
                 </div>
-                <div className="bg-[#111115] p-6 rounded-2xl border border-[#1e1e24] flex-1">
-                  <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.3em] mb-2 font-mono">Sync Status</p>
+                <div className="bg-gray-50 p-6 rounded-2xl border border-gray-200 flex-1">
+                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] mb-2 font-mono">Sync Status</p>
                   <p className="text-xl font-black text-primary font-display tracking-widest italic group-hover:neo-glow-primary">ACTIVE</p>
                 </div>
               </div>
@@ -150,10 +187,10 @@ export default function Dashboard({ profile }: DashboardProps) {
   }
 
   const cards = [
-    { label: 'Core Personnel', value: stats.totalUsers, icon: <Users size={24} />, color: 'bg-indigo-500', trend: 'Guru & Staff' },
-    { label: 'Unit Population', value: stats.totalStudents, icon: <GraduationCap size={24} />, color: 'bg-violet-500', trend: 'Total Siswa' },
-    { label: 'Decision Matrix', value: stats.activeSessions, icon: <Vote size={24} />, color: 'bg-emerald-500', trend: 'Total Sesi' },
-    { label: 'Temporal Status', value: 'FINAL', icon: <Clock size={24} />, color: 'bg-rose-500', trend: 'Grid Ready' },
+    { label: 'Core Personnel', value: stats.totalUsers, icon: <Users size={24} />, color: 'bg-[#556b2f]', trend: 'Total Akun' },
+    { label: 'Unit Population', value: stats.totalStudents, icon: <GraduationCap size={24} />, color: 'bg-[#3a4018]', trend: 'Siswa' },
+    { label: 'Decision Matrix', value: stats.activeSessions, icon: <Vote size={24} />, color: 'bg-emerald-600', trend: 'Total Sesi' },
+    { label: 'Temporal Status', value: 'FINAL', icon: <Clock size={24} />, color: 'bg-rose-600', trend: 'Grid Ready' },
   ];
 
   return (
@@ -169,22 +206,22 @@ export default function Dashboard({ profile }: DashboardProps) {
                ADMINISTRATIVE GRID SYNC
              </span>
            </div>
-          <h1 className="text-4xl font-extrabold text-white tracking-tighter italic font-display uppercase">Dashboard <span className="text-primary">Terminal</span></h1>
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tighter italic font-display uppercase">Dashboard <span className="text-primary">Terminal</span></h1>
           <p className="text-gray-500 mt-2 font-black text-[10px] uppercase tracking-[0.2em] font-mono leading-none italic">
-            Authorized: <span className="text-white">{profile?.name || 'ROOT'}</span> | Unit: <span className="text-primary">{profile?.role?.toUpperCase() || 'SYS'}</span>
+            Authorized: <span className="text-gray-900">{profile?.name || 'ROOT'}</span> | Unit: <span className="text-primary">{profile?.role?.toUpperCase() || 'SYS'}</span>
           </p>
         </motion.div>
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-4 bg-[#111115] px-6 py-4 rounded-xl shadow-lg border border-[#1e1e24]"
+          className="flex items-center gap-4 bg-white px-6 py-4 rounded-xl shadow-lg border border-gray-200"
         >
           <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-inner">
             <Calendar size={18} />
           </div>
           <div>
-            <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.3em] leading-none mb-1 font-mono">Temporal Grid</p>
-            <span className="text-[11px] font-black text-gray-300 uppercase tracking-widest font-mono">
+            <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.3em] leading-none mb-1 font-mono">Temporal Grid</p>
+            <span className="text-[11px] font-black text-gray-700 uppercase tracking-widest font-mono">
               {format(new Date(), 'dd.MM.yyyy', { locale: id })}
             </span>
           </div>
@@ -198,17 +235,17 @@ export default function Dashboard({ profile }: DashboardProps) {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: idx * 0.1 }}
-            className="bg-[#0a0a0b] p-8 rounded-2xl border border-[#1e1e24] shadow-xl hover:border-primary/40 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden"
+            className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl hover:border-primary/40 hover:-translate-y-2 transition-all duration-500 group relative overflow-hidden"
           >
-            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-primary/10 transition-all"></div>
+            <div className="absolute top-0 right-0 w-24 h-24 bg-primary/10 rounded-full blur-2xl -mr-12 -mt-12 group-hover:bg-primary/20 transition-all"></div>
             <div className={`${card.color} w-14 h-14 rounded-xl text-white shadow-xl flex items-center justify-center transition-all duration-500 group-hover:scale-110 group-hover:neo-glow-primary`}>
               {card.icon}
             </div>
             <div className="mt-8 relative z-10">
-              <p className="text-[9px] text-gray-600 font-extrabold uppercase tracking-[0.3em] mb-2 font-mono">{card.label}</p>
+              <p className="text-[9px] text-gray-500 font-extrabold uppercase tracking-[0.3em] mb-2 font-mono">{card.label}</p>
               <div className="flex items-baseline gap-3">
-                <p className="text-4xl font-black text-white tracking-tighter font-display">{card.value}</p>
-                <div className="px-2 py-0.5 bg-[#111115] rounded border border-[#1e1e24]">
+                <p className="text-4xl font-black text-gray-900 tracking-tighter font-display">{card.value}</p>
+                <div className="px-2 py-0.5 bg-gray-50 rounded border border-gray-200">
                   <span className="text-[8px] font-black text-primary uppercase tracking-widest font-mono italic">{card.trend}</span>
                 </div>
               </div>
@@ -253,22 +290,22 @@ export default function Dashboard({ profile }: DashboardProps) {
         <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-[#0a0a0b] p-10 rounded-2xl border border-[#1e1e24] shadow-2xl relative overflow-hidden group"
+          className="bg-white p-10 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden group"
         >
-          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+          <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
           <div className="relative z-10">
-            <h2 className="text-xl font-extrabold mb-8 text-white tracking-widest uppercase italic font-mono flex items-center gap-4">
+            <h2 className="text-xl font-extrabold mb-8 text-gray-900 tracking-widest uppercase italic font-mono flex items-center gap-4">
               <div className="w-1.5 h-6 bg-primary rounded-full transition-all group-hover:scale-y-125"></div> 
               Grid Protocol Guide
             </h2>
             <div className="space-y-8">
                <div className="group/item">
-                  <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] mb-2 group-hover/item:text-primary transition-colors font-mono italic">Decision Invariants</p>
-                  <p className="text-xs font-black text-gray-500 leading-relaxed italic font-mono uppercase tracking-widest">Matriks keputusan bersifat final dan tidak dapat diubah setelah sinkronisasi Dewan Guru selesai.</p>
+                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2 group-hover/item:text-primary transition-colors font-mono italic">Decision Invariants</p>
+                  <p className="text-xs font-black text-gray-600 leading-relaxed italic font-mono uppercase tracking-widest">Matriks keputusan bersifat final dan tidak dapat diubah setelah sinkronisasi Dewan Guru selesai.</p>
                </div>
                <div className="group/item">
-                  <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] mb-2 group-hover/item:text-primary transition-colors font-mono italic">Security Protocol</p>
-                  <p className="text-xs font-black text-gray-500 leading-relaxed italic font-mono uppercase tracking-widest">Akses terminal dibatasi hanya untuk unit yang memiliki otorisasi level G-0 atau lebih tinggi.</p>
+                  <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] mb-2 group-hover/item:text-primary transition-colors font-mono italic">Security Protocol</p>
+                  <p className="text-xs font-black text-gray-600 leading-relaxed italic font-mono uppercase tracking-widest">Akses terminal dibatasi hanya untuk unit yang memiliki otorisasi level G-0 atau lebih tinggi.</p>
                </div>
             </div>
           </div>
@@ -277,19 +314,19 @@ export default function Dashboard({ profile }: DashboardProps) {
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="bg-[#0a0a0b] p-10 rounded-2xl border border-[#1e1e24] shadow-2xl relative overflow-hidden group"
+          className="bg-white p-10 rounded-2xl border border-gray-200 shadow-xl relative overflow-hidden group"
         >
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-indigo-500/5 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-green-500/10 rounded-full blur-3xl group-hover:scale-150 transition-transform duration-1000"></div>
           <div className="relative z-10">
-            <h2 className="text-xl font-extrabold mb-8 text-white tracking-widest uppercase italic font-mono flex items-center gap-4">
-              <div className="w-1.5 h-6 bg-indigo-500 rounded-full transition-all group-hover:scale-y-125"></div> 
+            <h2 className="text-xl font-extrabold mb-8 text-gray-900 tracking-widest uppercase italic font-mono flex items-center gap-4">
+              <div className="w-1.5 h-6 bg-green-600 rounded-full transition-all group-hover:scale-y-125"></div> 
               Sync Terminal
             </h2>
             <div className="space-y-6">
-              <p className="text-xs font-black text-gray-600 uppercase tracking-[0.3em] font-mono leading-none">System Readiness</p>
-              <div className="p-8 bg-[#111115] rounded-xl border border-[#1e1e24] transition-all hover:bg-[#1a1a20]">
+              <p className="text-xs font-black text-gray-500 uppercase tracking-[0.3em] font-mono leading-none">System Readiness</p>
+              <div className="p-8 bg-gray-50 rounded-xl border border-gray-200 transition-all hover:bg-gray-100">
                 <p className="text-[9px] font-black text-primary uppercase tracking-[0.4em] mb-2 font-mono italic">Support Uplink</p>
-                <p className="text-[10px] font-black text-gray-500 leading-relaxed uppercase tracking-widest font-mono">Hubungi root administrator untuk pemulihan unit atau sinkronisasi data master yang terputus.</p>
+                <p className="text-[10px] font-black text-gray-600 leading-relaxed uppercase tracking-widest font-mono">Hubungi root administrator untuk pemulihan unit atau sinkronisasi data master yang terputus.</p>
               </div>
             </div>
           </div>

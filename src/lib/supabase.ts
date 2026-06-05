@@ -32,6 +32,22 @@ if (!isSupabaseConfigured) {
   console.error('Supabase configuration is missing or invalid! Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment variables.');
 }
 
+// SAFETY CHECK: Detect if service_role key is accidentally used (VERY DANGEROUS in frontend!)
+try {
+  if (finalKey && finalKey !== DEFAULT_KEY) {
+    const payload = JSON.parse(atob(finalKey.split('.')[1]));
+    if (payload.role === 'service_role') {
+      console.error(
+        '🚨 CRITICAL SECURITY WARNING: You are using the service_role key in the frontend! ' +
+        'This exposes FULL DATABASE ACCESS to anyone. ' +
+        'Go to Supabase Dashboard > Settings > API and use the "anon" "public" key instead.'
+      );
+    }
+  }
+} catch (e) {
+  // Not a valid JWT, ignore
+}
+
 export const supabase = createClient(finalUrl, finalKey, {
   auth: {
     persistSession: true,

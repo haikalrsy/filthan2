@@ -118,8 +118,8 @@ export default function StudentMaster() {
                MASTER REGISTRY ACCESS
              </span>
            </div>
-          <h1 className="text-4xl font-extrabold text-white tracking-widest leading-none font-display uppercase italic">Unit <span className="text-primary tracking-tighter">Index</span></h1>
-          <p className="text-gray-500 mt-2 font-black text-[10px] uppercase tracking-[0.3em] font-mono leading-none italic">Manage all authorized personnel profiles in core grid.</p>
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-widest leading-none font-display uppercase italic">Unit <span className="text-primary tracking-tighter">Index</span></h1>
+          <p className="text-gray-600 mt-2 font-black text-[10px] uppercase tracking-[0.3em] font-mono leading-none italic">Manage all authorized personnel profiles in core grid.</p>
         </motion.div>
         
         <motion.div 
@@ -142,9 +142,9 @@ export default function StudentMaster() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#0a0a0b] p-8 rounded-2xl border border-[#1e1e24] shadow-2xl"
+            className="bg-white p-8 rounded-2xl border border-gray-200 shadow-xl"
           >
-            <h3 className="text-[10px] font-black text-gray-600 uppercase tracking-[0.4em] mb-6 flex items-center gap-2 font-mono italic">
+            <h3 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.4em] mb-6 flex items-center gap-2 font-mono italic">
               <Filter size={14} className="text-primary" /> Sector Filter
             </h3>
             <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
@@ -152,8 +152,8 @@ export default function StudentMaster() {
                 onClick={() => setSelectedClass('all')}
                 className={`w-full text-left px-5 py-5 rounded-xl font-black text-[11px] uppercase tracking-[0.25em] transition-all duration-300 font-mono italic border ${
                   selectedClass === 'all' 
-                    ? 'bg-primary border-primary text-white shadow-2xl translate-x-2' 
-                    : 'bg-[#111115] border-[#1e1e24] text-gray-700 hover:text-white hover:border-primary/40'
+                    ? 'bg-primary border-primary text-white shadow-xl translate-x-2' 
+                    : 'bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-900 hover:border-primary/40'
                 }`}
               >
                 All Personnel
@@ -164,8 +164,8 @@ export default function StudentMaster() {
                   onClick={() => setSelectedClass(c)}
                   className={`w-full text-left px-5 py-5 rounded-xl font-black text-[11px] uppercase tracking-[0.25em] transition-all duration-300 font-mono italic border ${
                     selectedClass === c 
-                      ? 'bg-primary border-primary text-white shadow-2xl translate-x-2' 
-                      : 'bg-[#111115] border-[#1e1e24] text-gray-700 hover:text-white hover:border-primary/40'
+                      ? 'bg-primary border-primary text-white shadow-xl translate-x-2' 
+                      : 'bg-gray-50 border-gray-200 text-gray-600 hover:text-gray-900 hover:border-primary/40'
                   }`}
                 >
                   {c}
@@ -193,16 +193,16 @@ export default function StudentMaster() {
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#0a0a0b] p-3 rounded-2xl border border-[#1e1e24] shadow-2xl flex items-center gap-4 group focus-within:border-primary/50 transition-all duration-300"
+            className="bg-white p-3 rounded-2xl border border-gray-200 shadow-xl flex items-center gap-4 group focus-within:border-primary/50 transition-all duration-300"
           >
             <div className="flex-1 relative">
-              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-700 group-focus-within:text-primary transition-colors" size={20} />
+              <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-primary transition-colors" size={20} />
               <input 
                 type="text" 
                 placeholder="SCAN REGISTRY FOR IDENTIFIER OR NIS..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-16 pr-6 py-4 bg-[#111115] text-white border-none rounded-xl outline-none font-black text-[11px] tracking-[0.2em] transition-all placeholder:text-gray-800 font-mono italic shadow-inner"
+                className="w-full pl-16 pr-6 py-4 bg-gray-50 text-gray-900 border border-gray-200 rounded-xl outline-none font-black text-[11px] tracking-[0.2em] transition-all placeholder:text-gray-400 font-mono italic shadow-inner focus:bg-white"
               />
             </div>
           </motion.div>
@@ -211,12 +211,12 @@ export default function StudentMaster() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="glass-card shadow-lg"
+            className="glass-card shadow-xl overflow-hidden"
           >
             <div className="overflow-x-auto custom-scrollbar">
               <table className="w-full text-left">
                 <thead>
-                  <tr className="bg-[#111115] text-gray-600 text-[9px] uppercase tracking-[0.3em] font-black border-b border-[#1e1e24] font-mono italic">
+                  <tr className="bg-gray-50 text-gray-500 text-[9px] uppercase tracking-[0.3em] font-black border-b border-gray-200 font-mono italic">
                     <th className="px-10 py-6">Registry Identifier</th>
                     <th className="px-10 py-6">NIS Header</th>
                     <th className="px-10 py-6">Sector Placement</th>
@@ -224,19 +224,19 @@ export default function StudentMaster() {
                     <th className="px-10 py-6 text-right">Access</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-[#1e1e24]">
+                <tbody className="divide-y divide-gray-200">
                   {loading ? (
                     <tr><td colSpan={5} className="px-10 py-24 text-center">
                       <div className="flex flex-col items-center gap-4">
                         <div className="w-12 h-12 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-gray-600 font-black text-[10px] uppercase tracking-[0.4em] font-mono italic animate-pulse">Scanning Grid Registry...</p>
+                        <p className="text-gray-500 font-black text-[10px] uppercase tracking-[0.4em] font-mono italic animate-pulse">Scanning Grid Registry...</p>
                       </div>
                     </td></tr>
                   ) : filteredStudents.length === 0 ? (
                     <tr><td colSpan={5} className="px-10 py-24 text-center">
                       <div className="flex flex-col items-center gap-6">
-                        <Search size={48} className="text-gray-800" />
-                        <p className="text-gray-600 font-black text-[10px] uppercase tracking-[0.4em] font-mono italic">Zero records matched search parameters.</p>
+                        <Search size={48} className="text-gray-400" />
+                        <p className="text-gray-500 font-black text-[10px] uppercase tracking-[0.4em] font-mono italic">Zero records matched search parameters.</p>
                       </div>
                     </td></tr>
                   ) : filteredStudents.map((student, idx) => {
@@ -255,32 +255,32 @@ export default function StudentMaster() {
                       >
                         <td className="px-10 py-6">
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#111115] rounded-lg border border-[#1e1e24] flex items-center justify-center text-primary shadow-inner group-hover:neo-glow-primary transition-all">
+                            <div className="w-10 h-10 bg-gray-50 rounded-lg border border-gray-200 flex items-center justify-center text-primary shadow-inner group-hover:neo-glow-primary transition-all">
                               <Users size={16} />
                             </div>
                             <div>
-                              <p className="font-extrabold text-white text-[11px] uppercase tracking-widest mb-1 group-hover:text-primary transition-colors font-mono italic">{student.name}</p>
+                              <p className="font-extrabold text-gray-900 text-[11px] uppercase tracking-widest mb-1 group-hover:text-primary transition-colors font-mono italic">{student.name}</p>
                               {student.isAccount ? (
-                                <span className="text-[8px] bg-emerald-500/10 text-emerald-500 px-2.5 py-0.5 rounded-full font-black uppercase tracking-[0.2em] font-mono border border-emerald-500/20">Uplinked</span>
+                                <span className="text-[8px] bg-emerald-500/10 text-emerald-600 px-2.5 py-0.5 rounded-full font-black uppercase tracking-[0.2em] font-mono border border-emerald-500/20">Uplinked</span>
                               ) : (
-                                <span className="text-[8px] bg-gray-500/10 text-gray-600 px-2.5 py-0.5 rounded-full font-black uppercase tracking-[0.2em] font-mono border border-gray-500/20">Data Only</span>
+                                <span className="text-[8px] bg-gray-200 text-gray-600 px-2.5 py-0.5 rounded-full font-black uppercase tracking-[0.2em] font-mono border border-gray-300">Data Only</span>
                               )}
                             </div>
                           </div>
                         </td>
-                        <td className="px-10 py-6 text-gray-600 font-black text-[10px] uppercase font-mono tracking-widest">{student.nis || student.nik || '---'}</td>
+                        <td className="px-10 py-6 text-gray-500 font-black text-[10px] uppercase font-mono tracking-widest">{student.nis || student.nik || '---'}</td>
                         <td className="px-10 py-6">
-                          <span className="px-3 py-1 bg-[#111115] border border-[#1e1e24] rounded-lg text-[9px] font-black text-primary uppercase tracking-widest shadow-inner font-mono">{student.class}</span>
+                          <span className="px-3 py-1 bg-gray-50 border border-gray-200 rounded-lg text-[9px] font-black text-primary uppercase tracking-widest shadow-inner font-mono">{student.class}</span>
                         </td>
                         <td className="px-10 py-6">
                           <div className="flex flex-col items-center gap-2">
                             <div className="flex items-center gap-2 text-[8px] font-black font-mono">
-                              <span className="text-emerald-500 bg-emerald-500/5 px-2 py-1 rounded-md border border-emerald-500/10 uppercase tracking-widest">Conf: {positiveVotes}</span>
-                              <span className="text-rose-500 bg-rose-500/5 px-2 py-1 rounded-md border border-rose-500/10 uppercase tracking-widest">Deny: {negativeVotes}</span>
+                              <span className="text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20 uppercase tracking-widest">Conf: {positiveVotes}</span>
+                              <span className="text-rose-600 bg-rose-500/10 px-2 py-1 rounded-md border border-rose-500/20 uppercase tracking-widest">Deny: {negativeVotes}</span>
                             </div>
                             {studentVotes.length > 0 && (
                               <div className={`px-4 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.3em] shadow-lg font-mono italic ${
-                                isPassed ? 'bg-primary text-white neo-glow-primary' : 'bg-[#111115] text-gray-600 border border-[#1e1e24]'
+                                isPassed ? 'bg-primary text-white neo-glow-primary' : 'bg-gray-50 text-gray-500 border border-gray-200'
                               }`}>
                                 {isPassed ? 'VERIFIED_FINAL' : 'PENDING_MATRIX'}
                               </div>
@@ -307,49 +307,49 @@ export default function StudentMaster() {
       </div>
 
       {showAddModal && (
-        <div className="fixed inset-0 bg-dark/80 backdrop-blur-md z-50 flex items-center justify-center p-6">
+        <div className="fixed inset-0 bg-gray-900/80 backdrop-blur-md z-50 flex items-center justify-center p-6">
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="bg-[#0a0a0b] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-[#1e1e24]"
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-gray-200"
           >
             <div className="primary-gradient p-12 text-white text-center relative overflow-hidden">
                <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -mr-16 -mt-16" />
                <div className="relative z-10 space-y-2">
-                 <h1 className="text-[10px] font-black text-white/60 tracking-[0.4em] uppercase font-mono italic">Sub-Protocol: Initialization</h1>
+                 <h1 className="text-[10px] font-black text-white/80 tracking-[0.4em] uppercase font-mono italic">Sub-Protocol: Initialization</h1>
                  <h3 className="text-3xl font-extrabold tracking-tighter italic font-display uppercase">Register Unit</h3>
-                 <p className="text-[10px] font-black text-white/50 uppercase tracking-[0.2em] font-mono leading-none mt-4 italic">Commit profile to core registry</p>
+                 <p className="text-[10px] font-black text-white/70 uppercase tracking-[0.2em] font-mono leading-none mt-4 italic">Commit profile to core registry</p>
                </div>
             </div>
             <form onSubmit={handleAddStudent} className="p-10 space-y-8">
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] pl-1 font-mono italic">Core Identity</label>
+                <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] pl-1 font-mono italic">Core Identity</label>
                 <input 
                   type="text" 
                   value={newStudent.name}
                   onChange={(e) => setNewStudent({...newStudent, name: e.target.value})}
-                  className="w-full px-6 py-4 bg-[#111115] border border-[#1e1e24] rounded-xl focus:border-primary/50 text-white outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-800 transition-all shadow-inner"
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary/50 text-gray-900 outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-400 transition-all shadow-inner focus:bg-white"
                   placeholder="EX: SYSTEM_NODE_01"
                   required
                 />
               </div>
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] pl-1 font-mono italic">Primary Serial (NIS)</label>
+                <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] pl-1 font-mono italic">Primary Serial (NIS)</label>
                 <input 
                   type="text" 
                   value={newStudent.nis}
                   onChange={(e) => setNewStudent({...newStudent, nis: e.target.value})}
-                  className="w-full px-6 py-4 bg-[#111115] border border-[#1e1e24] rounded-xl focus:border-primary/50 text-white outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-800 transition-all shadow-inner"
+                  className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary/50 text-gray-900 outline-none font-black text-[11px] tracking-widest font-mono placeholder:text-gray-400 transition-all shadow-inner focus:bg-white"
                   placeholder="SN-XXXX-XXXX"
                 />
               </div>
               <div className="space-y-3">
-                <label className="text-[9px] font-black text-gray-600 uppercase tracking-[0.4em] pl-1 font-mono italic">Grid Sector Assignment</label>
+                <label className="text-[9px] font-black text-gray-500 uppercase tracking-[0.4em] pl-1 font-mono italic">Grid Sector Assignment</label>
                 <div className="relative group">
                   <select 
                     value={newStudent.class}
                     onChange={(e) => setNewStudent({...newStudent, class: e.target.value})}
-                    className="w-full px-6 py-4 bg-[#111115] border border-[#1e1e24] rounded-xl focus:border-primary/50 text-white outline-none font-black text-[11px] tracking-widest font-mono transition-all h-[60px] appearance-none cursor-pointer shadow-inner uppercase"
+                    className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:border-primary/50 text-gray-900 outline-none font-black text-[11px] tracking-widest font-mono transition-all h-[60px] appearance-none cursor-pointer shadow-inner uppercase focus:bg-white"
                     required
                   >
                     <option value="">-- SELECT SECTOR --</option>
@@ -363,13 +363,13 @@ export default function StudentMaster() {
                 <button 
                   type="button" 
                   onClick={() => setShowAddModal(false)}
-                  className="flex-1 py-4 bg-[#111115] text-gray-600 font-black rounded-xl hover:text-white transition-all uppercase tracking-widest text-[9px] font-mono italic border border-[#1e1e24]"
+                  className="flex-1 py-4 bg-gray-100 text-gray-600 font-black rounded-xl hover:text-gray-900 transition-all uppercase tracking-widest text-[9px] font-mono italic border border-gray-200"
                 >
                   Abort
                 </button>
                 <button 
                   type="submit"
-                  className="flex-1 py-4 primary-gradient text-white font-black rounded-xl shadow-2xl hover:scale-[1.05] active:scale-[0.95] transition-all uppercase tracking-widest text-[9px] font-mono italic"
+                  className="flex-1 py-4 primary-gradient text-white font-black rounded-xl shadow-xl hover:scale-[1.05] active:scale-[0.95] transition-all uppercase tracking-widest text-[9px] font-mono italic"
                 >
                   Synchronize
                 </button>
