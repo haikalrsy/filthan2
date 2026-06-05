@@ -5,9 +5,10 @@ import { useNavigate } from 'react-router-dom';
 
 interface NavbarProps {
   profile: UserProfile | null;
+  onMenuClick?: () => void;
 }
 
-export default function Navbar({ profile }: NavbarProps) {
+export default function Navbar({ profile, onMenuClick }: NavbarProps) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -18,7 +19,7 @@ export default function Navbar({ profile }: NavbarProps) {
   return (
     <header className="h-20 bg-white/80 backdrop-blur-md border-b border-gray-200 px-6 sm:px-10 flex items-center justify-between sticky top-0 z-30">
       <div className="flex items-center gap-4 md:hidden">
-        <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-xl border border-gray-200">
+        <button onClick={onMenuClick} className="p-2 text-gray-500 hover:bg-gray-100 rounded-xl border border-gray-200">
           <Menu size={20} />
         </button>
         <div className="flex items-center gap-2">

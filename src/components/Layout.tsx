@@ -1,13 +1,16 @@
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Navbar from './Navbar';
 import { UserProfile } from '../App';
+import { useState } from 'react';
 
 interface LayoutProps {
   profile: UserProfile | null;
 }
 
 export default function Layout({ profile }: LayoutProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen bg-gray-50 text-gray-900 relative">
       {/* Background Orbs */}
@@ -17,15 +20,15 @@ export default function Layout({ profile }: LayoutProps) {
       </div>
 
       {/* Sidebar - Left Menu */}
-      <Sidebar profile={profile} />
+      <Sidebar profile={profile} isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-h-screen relative z-10">
+      <div className="flex-1 flex flex-col min-h-screen relative z-10 overflow-x-hidden">
         {/* Navbar - Top Bar */}
-        <Navbar profile={profile} />
+        <Navbar profile={profile} onMenuClick={() => setIsSidebarOpen(true)} />
 
         {/* Content */}
-        <main className="p-6 sm:p-10 flex-1">
+        <main className="p-4 sm:p-6 md:p-10 flex-1">
           <Outlet />
         </main>
       </div>

@@ -157,7 +157,7 @@ export default function PublicCheck() {
                 className="space-y-6"
               >
                 <div className="bg-gray-50 p-8 rounded-3xl border border-gray-200">
-                  <div className="grid grid-cols-3 gap-y-6 gap-x-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-6 gap-x-6">
                     <div>
                       <p className="text-[10px] text-primary font-black uppercase tracking-widest mb-1.5 flex items-center gap-2">
                         <span className="w-1.5 h-1.5 bg-primary rounded-full"></span> Nama Siswa

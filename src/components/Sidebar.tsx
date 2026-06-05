@@ -15,9 +15,11 @@ import { supabase } from '../lib/supabase';
 
 interface SidebarProps {
   profile: UserProfile | null;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ profile }: SidebarProps) {
+export default function Sidebar({ profile, isOpen, onClose }: SidebarProps) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -43,8 +45,21 @@ export default function Sidebar({ profile }: SidebarProps) {
   }
 
   return (
-    <aside className="w-72 bg-white border-r border-gray-200 flex flex-col sticky top-0 h-screen hidden md:flex shrink-0 z-20">
-      <div className="p-8 flex-1 overflow-y-auto custom-scrollbar">
+    <>
+      {/* Mobile overlay backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm z-40 md:hidden"
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={`
+        fixed md:sticky top-0 left-0 h-screen w-72 bg-white border-r border-gray-200 
+        flex flex-col shrink-0 z-50 transition-transform duration-300 ease-in-out
+        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <div className="p-8 flex-1 overflow-y-auto custom-scrollbar">
         <div className="flex items-center gap-3 mb-12">
           <div className="w-12 h-12 primary-gradient rounded-2xl flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-primary/20 transition-transform hover:scale-105">
             N
@@ -63,6 +78,9 @@ export default function Sidebar({ profile }: SidebarProps) {
                 key={item.path}
                 to={item.path}
                 end={item.end}
+                onClick={() => {
+                  if (onClose) onClose();
+                }}
                 className={({ isActive }) => `
                    flex items-center gap-4 px-4 py-4 rounded-xl transition-all duration-300 group
                    ${isActive
@@ -114,5 +132,6 @@ export default function Sidebar({ profile }: SidebarProps) {
         </button>
       </div>
     </aside>
+    </>
   );
 }
